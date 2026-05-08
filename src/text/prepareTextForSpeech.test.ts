@@ -97,6 +97,20 @@ const cases: Array<{ name: string; input: string; expected: string }> = [
     expected:
       "This connects to the idea that embodied simulation proposes we understand others by neurally rehearsing their states, but shifts inward.",
   },
+  {
+    name: "does not frame proposition wiki links before colons",
+    input:
+      "In Gernot Bohme's aesthetics, [[atmospheres are felt spaces between subject and object]]: they are not merely objective properties.",
+    expected:
+      "In Gernot Bohme's aesthetics, atmospheres are felt spaces between subject and object: they are not merely objective properties.",
+  },
+  {
+    name: "does not frame conditional proposition wiki links",
+    input:
+      "If [[emotions can be spatial atmospheres rather than private states]], then the feeling after rainfall is not merely inner.",
+    expected:
+      "If emotions can be spatial atmospheres rather than private states, then the feeling after rainfall is not merely inner.",
+  },
 ];
 
 for (const testCase of cases) {

@@ -4,6 +4,9 @@ const INLINE_CODE_PATTERN = /`([^`]+)`/g;
 const CODE_BLOCK_PATTERN = /```[\s\S]*?```/g;
 const PROPOSITION_VERB_PATTERN =
   /\b(?:am|is|are|was|were|be|being|been|can|cannot|could|should|would|will|do|does|did|has|have|had|proposes?|presents?|organizes?|rehearses?|simulates?|shows?|links?|depends?|becomes?|suggests?|explains?|argues?|claims?|frames?|defines?|describes?)\b/i;
+const CLAUSE_OPENER_PATTERN =
+  /\b(?:if|when|because|although|though|since|while|whether|that|where|how)\s*$/i;
+const LINK_CLAUSE_BOUNDARY_PATTERN = /^\s*(?:[,;.!?]|$)/;
 
 export function prepareTextForSpeech(rawText: string): string {
   return normalizeWhitespace(
@@ -22,27 +25,35 @@ function convertCodeBlocks(text: string): string {
 }
 
 function convertWikiLinks(text: string): string {
-  return text.replace(WIKI_LINK_PATTERN, (match: string, body: string) => {
-    const isEmbed = match.startsWith("!");
-    const [target, alias] = body.split("|");
-    const spokenText = cleanLinkText(alias || target || "");
+  return text.replace(
+    WIKI_LINK_PATTERN,
+    (match: string, body: string, offset: number, fullText: string) => {
+      const isEmbed = match.startsWith("!");
+      const [target, alias] = body.split("|");
+      const spokenText = cleanLinkText(alias || target || "");
 
-    if (!spokenText) {
-      return isEmbed ? "Embedded item." : "Linked note.";
-    }
+      if (!spokenText) {
+        return isEmbed ? "Embedded item." : "Linked note.";
+      }
 
-    if (isEmbed) {
-      return `Embedded item: ${spokenText}.`;
-    }
+      if (isEmbed) {
+        return `Embedded item: ${spokenText}.`;
+      }
 
-    if (alias) {
-      return spokenText;
-    }
+      if (alias) {
+        return spokenText;
+      }
 
-    return isPropositionLike(spokenText)
-      ? `the idea that ${lowercaseFirstLetter(spokenText)}`
-      : spokenText;
-  });
+      return shouldFrameWikiLinkAsIdea(
+        spokenText,
+        fullText,
+        offset,
+        offset + match.length,
+      )
+        ? `the idea that ${lowercaseFirstLetter(spokenText)}`
+        : spokenText;
+    },
+  );
 }
 
 function convertMarkdownLinks(text: string): string {
@@ -138,4 +149,54 @@ function isPropositionLike(text: string): boolean {
 
 function lowercaseFirstLetter(text: string): string {
   return text.replace(/^([A-Z])/, (firstLetter) => firstLetter.toLowerCase());
+}
+
+function isDirectColonClaim(text: string, startIndex: number, endIndex: number): boolean {
+  return (
+    text.slice(endIndex).trimStart().startsWith(":") &&
+    !isPrepositionalObjectContext(text, startIndex)
+  );
+}
+
+function shouldFrameWikiLinkAsIdea(
+  spokenText: string,
+  fullText: string,
+  startIndex: number,
+  endIndex: number,
+): boolean {
+  if (!isPropositionLike(spokenText)) {
+    return false;
+  }
+
+  if (isPrepositionalObjectContext(fullText, startIndex)) {
+    return true;
+  }
+
+  if (isDirectColonClaim(fullText, startIndex, endIndex)) {
+    return false;
+  }
+
+  if (
+    isClauseOpenerContext(fullText, startIndex) &&
+    isFollowedByClauseBoundary(fullText, endIndex)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function isPrepositionalObjectContext(text: string, index: number): boolean {
+  const beforeLink = text.slice(0, index).trimEnd();
+  return /\b(?:about|after|around|as|at|before|by|for|from|in|into|near|of|on|onto|through|to|toward|towards|with)\s*$/i.test(
+    beforeLink,
+  );
+}
+
+function isClauseOpenerContext(text: string, index: number): boolean {
+  return CLAUSE_OPENER_PATTERN.test(text.slice(0, index).trimEnd());
+}
+
+function isFollowedByClauseBoundary(text: string, index: number): boolean {
+  return LINK_CLAUSE_BOUNDARY_PATTERN.test(text.slice(index));
 }
