@@ -14,6 +14,13 @@ const cases: Array<{ name: string; input: string; expected: string }> = [
     expected: "Bordwell gives the classic account.",
   },
   {
+    name: "adds idea framing for proposition wiki links",
+    input:
+      "[[threat dreams rehearse danger without physical consequence]] gives the sharp case.",
+    expected:
+      "the idea that threat dreams rehearse danger without physical consequence gives the sharp case.",
+  },
+  {
     name: "reads wiki link aliases",
     input: "[[Bordwell's art cinema mode|classic account]] matters.",
     expected: "classic account matters.",
@@ -62,6 +69,33 @@ const cases: Array<{ name: string; input: string; expected: string }> = [
     name: "omits fenced code blocks",
     input: "Before\n```ts\nconst x = 1;\n```\nAfter",
     expected: "Before Code block omitted. After",
+  },
+  {
+    name: "frames proposition wiki links after this is why",
+    input:
+      "This is why [[dream consciousness presents experience as an immersive world-for-me]] matters.",
+    expected:
+      "This is why the idea that dream consciousness presents experience as an immersive world-for-me matters.",
+  },
+  {
+    name: "frames proposition wiki links as prepositional objects",
+    input:
+      "Dreaming sits near [[imagination and reality are equal and inseparable]]: imagination borrows the body's structure.",
+    expected:
+      "Dreaming sits near the idea that imagination and reality are equal and inseparable: imagination borrows the body's structure.",
+  },
+  {
+    name: "keeps aliases direct even when target is proposition-like",
+    input:
+      "from [[Fiction is a flight simulator for social cognition|fiction as safe rehearsal]] to games",
+    expected: "from fiction as safe rehearsal to games",
+  },
+  {
+    name: "frames capitalized proposition note titles",
+    input:
+      "This connects to [[Embodied simulation proposes we understand others by neurally rehearsing their states]], but shifts inward.",
+    expected:
+      "This connects to the idea that embodied simulation proposes we understand others by neurally rehearsing their states, but shifts inward.",
   },
 ];
 

@@ -2,6 +2,8 @@ const WIKI_LINK_PATTERN = /!?\[\[([^\]]+)\]\]/g;
 const MARKDOWN_LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g;
 const INLINE_CODE_PATTERN = /`([^`]+)`/g;
 const CODE_BLOCK_PATTERN = /```[\s\S]*?```/g;
+const PROPOSITION_VERB_PATTERN =
+  /\b(?:am|is|are|was|were|be|being|been|can|cannot|could|should|would|will|do|does|did|has|have|had|proposes?|presents?|organizes?|rehearses?|simulates?|shows?|links?|depends?|becomes?|suggests?|explains?|argues?|claims?|frames?|defines?|describes?)\b/i;
 
 export function prepareTextForSpeech(rawText: string): string {
   return normalizeWhitespace(
@@ -33,7 +35,13 @@ function convertWikiLinks(text: string): string {
       return `Embedded item: ${spokenText}.`;
     }
 
-    return spokenText;
+    if (alias) {
+      return spokenText;
+    }
+
+    return isPropositionLike(spokenText)
+      ? `the idea that ${lowercaseFirstLetter(spokenText)}`
+      : spokenText;
   });
 }
 
@@ -111,7 +119,9 @@ function normalizeSymbols(text: string): string {
 }
 
 function cleanLinkText(text: string): string {
-  return normalizeWhitespace(text.replace(/^#+/, "").replace(/\.(\w+)$/g, " dot $1"));
+  return normalizeWhitespace(
+    text.replace(/^#+/, "").replace(/\.(\w+)$/g, " dot $1"),
+  );
 }
 
 function normalizeWhitespace(text: string): string {
@@ -120,4 +130,12 @@ function normalizeWhitespace(text: string): string {
 
 function withSentenceEnd(text: string): string {
   return /[.!?]$/.test(text) ? text : `${text}.`;
+}
+
+function isPropositionLike(text: string): boolean {
+  return PROPOSITION_VERB_PATTERN.test(text);
+}
+
+function lowercaseFirstLetter(text: string): string {
+  return text.replace(/^([A-Z])/, (firstLetter) => firstLetter.toLowerCase());
 }
