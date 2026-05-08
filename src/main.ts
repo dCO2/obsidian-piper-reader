@@ -7,6 +7,8 @@ import {
   Setting,
 } from "obsidian";
 
+import { prepareTextForSpeech } from "./text/prepareTextForSpeech";
+
 interface PiperReaderSettings {
   bridgeUrl: string;
 }
@@ -52,13 +54,14 @@ export default class PiperReaderPlugin extends Plugin {
   async readText(text: string): Promise<void> {
     try {
       this.stopReading();
+      const preparedText = prepareTextForSpeech(text);
 
       const response = await fetch(`${this.settings.bridgeUrl}/tts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: preparedText }),
       });
 
       if (!response.ok) {
