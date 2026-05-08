@@ -21,9 +21,13 @@ export default class PiperReaderPlugin extends Plugin {
   settings: PiperReaderSettings = DEFAULT_SETTINGS;
   currentAudio: HTMLAudioElement | null = null;
   currentObjectUrl: string | null = null;
+  statusBarEl: HTMLElement | null = null;
+  playbackRate = 1;
 
   async onload(): Promise<void> {
     await this.loadSettings();
+    this.statusBarEl = this.addStatusBarItem();
+    this.renderPlaybackControls();
 
     this.addCommand({
       id: "read-selection-with-piper",
@@ -45,6 +49,14 @@ export default class PiperReaderPlugin extends Plugin {
       name: "Stop Piper reading",
       callback: () => {
         this.stopReading();
+      },
+    });
+
+    this.addCommand({
+      id: "pause-or-resume-piper-reading",
+      name: "Pause or resume Piper reading",
+      callback: async () => {
+        await this.togglePause();
       },
     });
 
@@ -73,6 +85,7 @@ export default class PiperReaderPlugin extends Plugin {
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const audio = new Audio(objectUrl);
+      audio.playbackRate = this.playbackRate;
 
       this.currentAudio = audio;
       this.currentObjectUrl = objectUrl;
@@ -81,6 +94,15 @@ export default class PiperReaderPlugin extends Plugin {
         this.clearAudio();
       };
 
+      audio.onplay = () => {
+        this.renderPlaybackControls();
+      };
+
+      audio.onpause = () => {
+        this.renderPlaybackControls();
+      };
+
+      this.renderPlaybackControls();
       await audio.play();
     } catch (error) {
       console.error(error);
@@ -105,6 +127,117 @@ export default class PiperReaderPlugin extends Plugin {
 
     this.currentAudio = null;
     this.currentObjectUrl = null;
+    this.renderPlaybackControls();
+  }
+
+  async togglePause(): Promise<void> {
+    if (!this.currentAudio) {
+      return;
+    }
+
+    if (this.currentAudio.paused) {
+      await this.currentAudio.play();
+    } else {
+      this.currentAudio.pause();
+    }
+  }
+
+  seekBy(seconds: number): void {
+    if (!this.currentAudio) {
+      return;
+    }
+
+    const duration = Number.isFinite(this.currentAudio.duration)
+      ? this.currentAudio.duration
+      : Number.POSITIVE_INFINITY;
+    const nextTime = Math.min(
+      Math.max(this.currentAudio.currentTime + seconds, 0),
+      duration,
+    );
+
+    this.currentAudio.currentTime = nextTime;
+    this.renderPlaybackControls();
+  }
+
+  setPlaybackRate(rate: number): void {
+    this.playbackRate = rate;
+
+    if (this.currentAudio) {
+      this.currentAudio.playbackRate = rate;
+    }
+
+    this.renderPlaybackControls();
+  }
+
+  renderPlaybackControls(): void {
+    if (!this.statusBarEl) {
+      return;
+    }
+
+    this.statusBarEl.empty();
+    this.statusBarEl.addClass("piper-reader-status");
+
+    if (!this.currentAudio) {
+      this.statusBarEl.setText("Piper idle");
+      return;
+    }
+
+    const label = this.statusBarEl.createSpan({
+      cls: "piper-reader-status-label",
+      text: "Piper",
+    });
+    label.setAttr("aria-label", "Piper Reader playback controls");
+
+    this.createControlButton(
+      this.currentAudio.paused ? "Resume" : "Pause",
+      () => {
+        void this.togglePause();
+      },
+    );
+    this.createControlButton("Back 10s", () => {
+      this.seekBy(-10);
+    });
+    this.createControlButton("Forward 10s", () => {
+      this.seekBy(10);
+    });
+    this.createControlButton("Stop", () => {
+      this.stopReading();
+    });
+
+    const speedSelect = this.statusBarEl.createEl("select", {
+      cls: "piper-reader-speed",
+      attr: {
+        "aria-label": "Playback speed",
+      },
+    });
+
+    for (const rate of [1, 1.5, 2]) {
+      const option = speedSelect.createEl("option", {
+        text: `${rate}x`,
+        value: String(rate),
+      });
+      option.selected = rate === this.playbackRate;
+    }
+
+    speedSelect.onchange = () => {
+      this.setPlaybackRate(Number(speedSelect.value));
+    };
+  }
+
+  createControlButton(label: string, onClick: () => void): void {
+    if (!this.statusBarEl) {
+      return;
+    }
+
+    const button = this.statusBarEl.createEl("button", {
+      cls: "piper-reader-control",
+      text: label,
+      attr: {
+        type: "button",
+      },
+    });
+
+    button.onclick = onClick;
   }
 
   onunload(): void {

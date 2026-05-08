@@ -1,1 +1,28 @@
-/* Piper Reader currently uses Obsidian's native UI styles. */
+.piper-reader-status {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.piper-reader-status-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.piper-reader-control,
+.piper-reader-speed {
+  background: transparent;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1;
+  min-height: 20px;
+  padding: 2px 6px;
+}
+
+.piper-reader-control:hover,
+.piper-reader-speed:hover {
+  border-color: var(--interactive-accent);
+  color: var(--text-normal);
+}
