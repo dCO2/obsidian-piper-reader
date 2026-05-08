@@ -33,7 +33,7 @@ function convertWikiLinks(text: string): string {
       return `Embedded item: ${spokenText}.`;
     }
 
-    return `${spokenText}, this links to another note,`;
+    return spokenText;
   });
 }
 

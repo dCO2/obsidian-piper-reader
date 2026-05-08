@@ -9,14 +9,14 @@ const cases: Array<{ name: string; input: string; expected: string }> = [
     expected: "The frame works — but has limits.",
   },
   {
-    name: "converts wiki links into spoken note cues",
+    name: "reads wiki links as their note text",
     input: "[[Bordwell]] gives the classic account.",
-    expected: "Bordwell, this links to another note, gives the classic account.",
+    expected: "Bordwell gives the classic account.",
   },
   {
-    name: "uses wiki link aliases",
+    name: "reads wiki link aliases",
     input: "[[Bordwell's art cinema mode|classic account]] matters.",
-    expected: "classic account, this links to another note, matters.",
+    expected: "classic account matters.",
   },
   {
     name: "converts embeds into spoken embed cues",
