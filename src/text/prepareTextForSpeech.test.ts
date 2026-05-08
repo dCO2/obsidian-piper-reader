@@ -111,6 +111,13 @@ const cases: Array<{ name: string; input: string; expected: string }> = [
     expected:
       "If emotions can be spatial atmospheres rather than private states, then the feeling after rainfall is not merely inner.",
   },
+  {
+    name: "does not frame complete proposition wiki links before semicolons",
+    input:
+      "[[Beautiful weather is not identical with fine weather]]; clouded, rainy, oppressive, post-rain, or contradictory weather can be aesthetically richer.",
+    expected:
+      "Beautiful weather is not identical with fine weather; clouded, rainy, oppressive, post-rain, or contradictory weather can be aesthetically richer.",
+  },
 ];
 
 for (const testCase of cases) {

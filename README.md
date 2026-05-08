@@ -111,6 +111,15 @@ If [[emotions can be spatial atmospheres rather than private states]], then ...
 -> If emotions can be spatial atmospheres rather than private states, then ...
 ```
 
+When a proposition-like link is already a complete clause and is followed by a
+strong clause boundary such as `;`, `.`, `!`, `?`, or the end of the selected
+text, it stays direct:
+
+```text
+[[Beautiful weather is not identical with fine weather]]; clouded, rainy weather can be richer.
+-> Beautiful weather is not identical with fine weather; clouded, rainy weather can be richer.
+```
+
 When a proposition-like link introduces an explanation with a direct colon, it
 stays direct unless it is also the object of a preposition:
 

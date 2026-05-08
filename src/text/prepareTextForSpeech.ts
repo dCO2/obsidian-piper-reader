@@ -7,6 +7,7 @@ const PROPOSITION_VERB_PATTERN =
 const CLAUSE_OPENER_PATTERN =
   /\b(?:if|when|because|although|though|since|while|whether|that|where|how)\s*$/i;
 const LINK_CLAUSE_BOUNDARY_PATTERN = /^\s*(?:[,;.!?]|$)/;
+const STRONG_CLAUSE_BOUNDARY_PATTERN = /^\s*(?:[;.!?]|$)/;
 
 export function prepareTextForSpeech(rawText: string): string {
   return normalizeWhitespace(
@@ -172,6 +173,10 @@ function shouldFrameWikiLinkAsIdea(
     return true;
   }
 
+  if (isFollowedByStrongClauseBoundary(fullText, endIndex)) {
+    return false;
+  }
+
   if (isDirectColonClaim(fullText, startIndex, endIndex)) {
     return false;
   }
@@ -199,4 +204,8 @@ function isClauseOpenerContext(text: string, index: number): boolean {
 
 function isFollowedByClauseBoundary(text: string, index: number): boolean {
   return LINK_CLAUSE_BOUNDARY_PATTERN.test(text.slice(index));
+}
+
+function isFollowedByStrongClauseBoundary(text: string, index: number): boolean {
+  return STRONG_CLAUSE_BOUNDARY_PATTERN.test(text.slice(index));
 }
