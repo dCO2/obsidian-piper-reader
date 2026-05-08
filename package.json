@@ -1,0 +1,28 @@
+{
+  "name": "obsidian-piper-reader",
+  "version": "0.1.0",
+  "description": "Read Obsidian notes aloud using a local Piper TTS server.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "piper",
+    "tts"
+  ],
+  "author": "Caleb",
+  "license": "MIT",
+  "dependencies": {
+    "obsidian": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "esbuild": "0.25.5",
+    "tslib": "2.4.0",
+    "typescript": "^5.8.3"
+  }
+}

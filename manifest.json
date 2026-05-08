@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-piper-reader",
+  "name": "Piper Reader",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Read Obsidian notes aloud using a local Piper TTS server.",
+  "author": "Caleb",
+  "authorUrl": "https://github.com/dCO2",
+  "isDesktopOnly": true
+}
